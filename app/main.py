@@ -18,6 +18,9 @@ def get_db():
     finally:
         db.close()
 
+# def auth_required(user: str = Depends(auth.get_current_user)):
+#     return user
+
 
 @app.post('/users/', response_model=schemas.User)
 def create_user(user: schemas.UserValidate, db: Session = Depends(get_db)):
@@ -43,18 +46,23 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
         )
     return db_user
 
-@app.post('/login')
+@app.post('/token')
 def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_username(db, username=user.username)
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Username or password incorrect'
+            detail='Username or password incorrect',
+            headers={"WWW-Authenticate": "Bearer"},
         )
     auth_user = auth.authenticate_user(user, db_user.password_hash)
     if not auth_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Username or password incorrect'
+            detail='Username or password incorrect',
+            headers={"WWW-Authenticate": "Bearer"},
         )
-    return {'message' : 'User Authenticated'}
+    access_token = auth.create_access_token(
+        data={"sub": user.username}
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
