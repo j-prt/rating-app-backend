@@ -1,7 +1,7 @@
 """Database models for ratings app."""
 
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship #  noqa
 
 from .db import Base
 
@@ -13,4 +13,4 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     password_hash = Column(String)
 
-    items = relationship("Item", back_populates="owner")
+#    items = relationship("Item", back_populates="owner")
