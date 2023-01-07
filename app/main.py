@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from . import crud, models, schemas, auth
 from .db import SessionLocal, engine
 
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -18,8 +19,10 @@ def get_db():
     finally:
         db.close()
 
-# def auth_required(user: str = Depends(auth.get_current_user)):
-#     return user
+def auth_required(db: Session = Depends(get_db),
+                  username: str = Depends(auth.get_current_user)):
+    auth_user = crud.get_user_by_username(db, username=username)
+    return auth_user
 
 
 @app.post('/users/', response_model=schemas.User)
@@ -31,7 +34,7 @@ def create_user(user: schemas.UserValidate, db: Session = Depends(get_db)):
 
 
 @app.get('/users/', response_model=list[schemas.User])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), user: models.User = Depends(auth_required)):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
@@ -63,6 +66,6 @@ def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = auth.create_access_token(
-        data={"sub": user.username}
+        data={"sub": db_user.username}
     )
     return {"access_token": access_token, "token_type": "bearer"}
