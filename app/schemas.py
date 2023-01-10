@@ -4,15 +4,24 @@ from pydantic import BaseModel
 
 
 class UserBase(BaseModel):
-    username: str
+    email: str
 
 
 class UserValidate(UserBase):
     password: str
 
+class UserCreate(UserBase):
+    password: str
+    username: str
+    first_name: str | None = None
+    last_name: str | None = None
+
 
 class User(UserBase):
     id: int
+    username: str
+    first_name: str | None = None
+    last_name: str | None = None
 
     class Config:
         orm_mode = True
@@ -24,4 +33,4 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    email: str | None = None

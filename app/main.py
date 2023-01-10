@@ -20,16 +20,16 @@ def get_db():
         db.close()
 
 def auth_required(db: Session = Depends(get_db),
-                  username: str = Depends(auth.get_current_user)):
-    auth_user = crud.get_user_by_username(db, username=username)
+                  email: str = Depends(auth.get_current_user)):
+    auth_user = crud.get_user_by_email(db, email=email)
     return auth_user
 
 
 @app.post('/users/', response_model=schemas.User)
-def create_user(user: schemas.UserValidate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_username(db, username=user.username)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail='Username unavailable.')
+        raise HTTPException(status_code=400, detail='Email already in use.')
     return crud.create_user(db=db, user=user)
 
 
@@ -51,21 +51,21 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 @app.post('/token')
 def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_username(db, username=user.username)
+    db_user = crud.get_user_by_email(db, email=user.email)
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Username or password incorrect',
+            detail='Email or password incorrect',
             headers={"WWW-Authenticate": "Bearer"},
         )
     auth_user = auth.authenticate_user(user, db_user.password_hash)
     if not auth_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Username or password incorrect',
+            detail='Email or password incorrect',
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = auth.create_access_token(
-        data={"sub": db_user.username}
+        data={"sub": db_user.email}
     )
     return {"access_token": access_token, "token_type": "bearer"}
