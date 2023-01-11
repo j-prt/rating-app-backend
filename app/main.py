@@ -24,16 +24,18 @@ def auth_required(db: Session = Depends(get_db),
     auth_user = crud.get_user_by_email(db, email=email)
     return auth_user
 
-
-@app.post('/users/', response_model=schemas.User)
+@app.post('/users', response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
-    if db_user:
+    db_email = crud.get_user_by_email(db, email=user.email)
+    if db_email:
         raise HTTPException(status_code=400, detail='Email already in use.')
+    db_user = crud.get_user_by_username(db, username=user.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail='Username already in use.')
     return crud.create_user(db=db, user=user)
 
 
-@app.get('/users/', response_model=list[schemas.User])
+@app.get('/users', response_model=list[schemas.User], status_code=201)
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), user: models.User = Depends(auth_required)):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users

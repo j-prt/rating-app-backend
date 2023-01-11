@@ -15,6 +15,12 @@ def get_user_by_email(db: Session, email: str) -> models.User | None:
     ).first()
 
 
+def get_user_by_username(db: Session, username: str) -> models.User | None:
+    return db.query(models.User).filter(
+        models.User.username == username
+    ).first()
+
+
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> list:
     return db.query(models.User).offset(skip).limit(limit).all()
 
