@@ -11,13 +11,13 @@ def get_user(db: Session, user_id: int) -> models.User | None:
 
 def get_user_by_email(db: Session, email: str) -> models.User | None:
     return db.query(models.User).filter(
-        models.User.email == email
+        models.User.email.ilike(email)
     ).first()
 
 
 def get_user_by_username(db: Session, username: str) -> models.User | None:
     return db.query(models.User).filter(
-        models.User.username == username
+        models.User.username.ilike(username)
     ).first()
 
 
