@@ -1,6 +1,7 @@
 """Routes and logic for ratings app back end API."""
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas, auth
@@ -23,6 +24,10 @@ def auth_required(db: Session = Depends(get_db),
                   email: str = Depends(auth.get_current_user)):
     auth_user = crud.get_user_by_email(db, email=email)
     return auth_user
+
+@app.get('/status')
+def check_status(db: Session = Depends(get_db), user: models.User = Depends(auth_required)):
+    return JSONResponse(status_code=200, content={'message': 'Status Confirmed!'})
 
 @app.post('/users', response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
