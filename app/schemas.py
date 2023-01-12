@@ -10,6 +10,7 @@ class UserBase(BaseModel):
 class UserValidate(UserBase):
     password: str
 
+
 class UserCreate(UserBase):
     password: str
     username: str

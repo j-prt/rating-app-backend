@@ -21,8 +21,8 @@ def get_user_by_username(db: Session, username: str) -> models.User | None:
     ).first()
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100) -> list:
-    return db.query(models.User).offset(skip).limit(limit).all()
+def get_users(db: Session) -> list:
+    return db.query(models.User).all()
 
 
 def create_user(db: Session, user: schemas.UserCreate) -> models.User:

@@ -1,7 +1,7 @@
 """Database models for ratings app."""
 
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship #  noqa
+from sqlalchemy.orm import relationship  # noqa
 
 from .db import Base
 

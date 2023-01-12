@@ -20,16 +20,20 @@ def get_db():
     finally:
         db.close()
 
+
 def auth_required(db: Session = Depends(get_db),
                   email: str = Depends(auth.get_current_user)):
     auth_user = crud.get_user_by_email(db, email=email)
     return auth_user
 
-@app.get('/status')
-def check_status(db: Session = Depends(get_db), user: models.User = Depends(auth_required)):
-    return JSONResponse(status_code=200, content={'message': 'Status Confirmed!'})
 
-@app.post('/users', response_model=schemas.User)
+@app.get('/status')
+def check_status(db: Session = Depends(get_db),
+                 user: models.User = Depends(auth_required)):
+    return JSONResponse(status_code=200, content={'message': 'Auth Confirmed'})
+
+
+@app.post('/users', response_model=schemas.User, status_code=201)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_email = crud.get_user_by_email(db, email=user.email)
     if db_email:
@@ -40,9 +44,10 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-@app.get('/users', response_model=list[schemas.User], status_code=201)
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), user: models.User = Depends(auth_required)):
-    users = crud.get_users(db, skip=skip, limit=limit)
+@app.get('/users', response_model=list[schemas.User])
+def read_users(db: Session = Depends(get_db),
+               user: models.User = Depends(auth_required)):
+    users = crud.get_users(db)
     return users
 
 
@@ -55,6 +60,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
             detail='User not found'
         )
     return db_user
+
 
 @app.post('/token')
 def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
