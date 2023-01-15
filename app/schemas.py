@@ -46,7 +46,7 @@ class User(UserBase):
 class RatingItemBase(BaseModel):
     category: str
     title: str
-    description: str | None = None
+
     image: str | None = None
     address: str | None = None
     latitude: int | None = None
@@ -63,6 +63,7 @@ class RatingItem(RatingItemBase):
 class RatingBase(BaseModel):
     rating: int
     itemId: int
+    description: str | None = None
 
 
 class Rating(RatingBase):

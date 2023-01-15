@@ -32,7 +32,6 @@ class RatingItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     userId = Column(ForeignKey('users.id'))
     title = Column(String, nullable=False)
-    description = Column(String)
     image = Column(String)
     address = Column(String)
     latitude = Column(Float)
@@ -52,5 +51,6 @@ class Rating(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     rating = Column(Integer, nullable=False)
+    description = Column(String)
     userId = Column(ForeignKey('users.id'), nullable=False)
     itemId = Column(ForeignKey('rating_items.id'), nullable=False)
