@@ -48,7 +48,7 @@ class RatingItem(Base):
 
 
 class Rating(Base):
-    ___tablename__ = 'ratings'
+    __tablename__ = 'ratings'
 
     id = Column(Integer, primary_key=True, index=True)
     rating = Column(Integer, nullable=False)
