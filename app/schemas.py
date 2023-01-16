@@ -70,6 +70,10 @@ class Rating(RatingBase):
     id: int
     userId: int
 
+class CreateRatingItem(RatingItemBase):
+    rating: int
+    description: str | None = None
+
 
 class Token(BaseModel):
     access_token: str

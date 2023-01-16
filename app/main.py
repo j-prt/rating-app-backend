@@ -85,7 +85,20 @@ def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
 
 
 @app.post('/ratings')
-def post_rating():
+def post_rating(rating: schemas.RatingBase | schemas.CreateRatingItem):
+    print(rating)
+    if isinstance(rating, schemas.RatingBase):
+        print('RatingBase')
+        return rating
+    elif isinstance(rating, schemas.CreateRatingItem):
+        print('CreateRatingItem')
+        return rating
+    else:
+        print('whoops')
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='No good. Try again, but right this time.',
+        )
     # Should be able to submit either a rating
     # or a rating + the description of an item,
     # which will then be created.
