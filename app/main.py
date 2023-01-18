@@ -89,22 +89,34 @@ def post_rating(data: schemas.RatingBase | schemas.CreateRatingItem,
                 db: Session = Depends(get_db)):
     print(data)
     if isinstance(data, schemas.RatingBase):
-        print('RatingBase')
-        return data
+        data = data.dict()
+        rating = crud.create_rating(db, 1, data)
+        if not rating:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='User already has a rating for this item.'
+            )
+        return rating
     elif isinstance(data, schemas.CreateRatingItem):
-        print
         data = data.dict()
         rating = data.pop('rating')
         desc = data.pop('description', None)
-        rating_item = crud.create_rating(db, 1, data)
+
+        rating_item = crud.create_rating_item(db, 1, data)
         if not rating_item:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='Incomplete latitude and longitude provided.'
             )
-        return rating_item
+        rating_data = {
+            'rating': rating,
+            'itemId': rating_item.id
+        }
+        if desc:
+            rating_data['description'] = desc
+        rating = crud.create_rating(db, 1, rating_data)
+        return rating
     else:
-        print('whoops')
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='No good. Try again, but right this time.',

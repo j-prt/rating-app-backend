@@ -7,7 +7,8 @@ from sqlalchemy import (
     ForeignKey,
     Float,
     DateTime,
-    CheckConstraint
+    CheckConstraint,
+    UniqueConstraint
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship  # noqa
@@ -51,7 +52,9 @@ class Rating(Base):
     __tablename__ = 'ratings'
 
     id = Column(Integer, primary_key=True, index=True)
+    itemId = Column(ForeignKey('rating_items.id'), nullable=False)
+    userId = Column(ForeignKey('users.id'), nullable=False)
     rating = Column(Integer, nullable=False)
     description = Column(String)
-    userId = Column(ForeignKey('users.id'), nullable=False)
-    itemId = Column(ForeignKey('rating_items.id'), nullable=False)
+
+    unique_user_item = UniqueConstraint('itemId', 'userId')

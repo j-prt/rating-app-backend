@@ -40,9 +40,9 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     return db_user
 
 
-def create_rating(db: Session,
-                  user_id: int,
-                  data: dict) -> models.RatingItem | None:
+def create_rating_item(db: Session,
+                       user_id: int,
+                       data: dict) -> models.RatingItem | None:
     try:
         rating_item = models.RatingItem(
             userId=user_id,
@@ -53,5 +53,20 @@ def create_rating(db: Session,
     except:
         return None
     db.refresh(rating_item)
-    print(rating_item)
     return rating_item
+
+
+def create_rating(db: Session,
+                  user_id: int,
+                  data: dict) -> models.Rating | None:
+    try:
+        rating = models.Rating(
+            userId = user_id,
+            **data,
+        )
+        db.add(rating)
+        db.commit()
+    except:
+        return None
+    db.refresh(rating)
+    return rating
