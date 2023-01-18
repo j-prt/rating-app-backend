@@ -85,14 +85,24 @@ def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
 
 
 @app.post('/ratings')
-def post_rating(rating: schemas.RatingBase | schemas.CreateRatingItem):
-    print(rating)
-    if isinstance(rating, schemas.RatingBase):
+def post_rating(data: schemas.RatingBase | schemas.CreateRatingItem,
+                db: Session = Depends(get_db)):
+    print(data)
+    if isinstance(data, schemas.RatingBase):
         print('RatingBase')
-        return rating
-    elif isinstance(rating, schemas.CreateRatingItem):
-        print('CreateRatingItem')
-        return rating
+        return data
+    elif isinstance(data, schemas.CreateRatingItem):
+        print
+        data = data.dict()
+        rating = data.pop('rating')
+        desc = data.pop('description', None)
+        rating_item = crud.create_rating(db, 1, data)
+        if not rating_item:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Incomplete latitude and longitude provided.'
+            )
+        return rating_item
     else:
         print('whoops')
         raise HTTPException(

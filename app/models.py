@@ -31,13 +31,14 @@ class RatingItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     userId = Column(ForeignKey('users.id'))
+    category = Column(String, nullable=False)
     title = Column(String, nullable=False)
     image = Column(String)
     address = Column(String)
     latitude = Column(Float)
     longitude = Column(Float)
-    time_created = Column(DateTime, server_default=func.now())
-    time_updated = Column(DateTime, onupdate=func.now())
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
+    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
 
     check = CheckConstraint(
         '''

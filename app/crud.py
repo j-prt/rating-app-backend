@@ -38,3 +38,20 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def create_rating(db: Session,
+                  user_id: int,
+                  data: dict) -> models.RatingItem | None:
+    try:
+        rating_item = models.RatingItem(
+            userId=user_id,
+            **data,
+        )
+        db.add(rating_item)
+        db.commit()
+    except:
+        return None
+    db.refresh(rating_item)
+    print(rating_item)
+    return rating_item
