@@ -86,54 +86,45 @@ def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
 
 @app.post('/ratings')
 def post_rating(data: schemas.RatingBase | schemas.CreateRatingItem,
-                db: Session = Depends(get_db)):
+                db: Session = Depends(get_db),
+                user: models.User = Depends(auth_required)):
     print(data)
     if isinstance(data, schemas.RatingBase):
         data = data.dict()
-        rating = crud.create_rating(db, 1, data)
+        rating = crud.create_rating(db, user.id, data)
+
         if not rating:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='User already has a rating for this item.'
             )
+
         return rating
     elif isinstance(data, schemas.CreateRatingItem):
         data = data.dict()
         rating = data.pop('rating')
         desc = data.pop('description', None)
+        rating_item = crud.create_rating_item(db, user.id, data)
 
-        rating_item = crud.create_rating_item(db, 1, data)
         if not rating_item:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='Incomplete latitude and longitude provided.'
             )
+
         rating_data = {
             'rating': rating,
             'itemId': rating_item.id
         }
         if desc:
             rating_data['description'] = desc
-        rating = crud.create_rating(db, 1, rating_data)
+        rating = crud.create_rating(db, user.id, rating_data)
         return rating
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='No good. Try again, but right this time.',
         )
-    # Should be able to submit either a rating
-    # or a rating + the description of an item,
-    # which will then be created.
-    # So the logic for case a) :
-    # User submits json with rating data and item id,
-    # rating is simply submitted.
-    # Logic for case b):
-    # User submits json with both rating data and item
-    # information -> item data is used to create item in db
-    # then rating is created linked to the new item
-
-    # Don't forget to test the lat/long constraint!
-    pass
 
 
 @app.get('/ratings')
