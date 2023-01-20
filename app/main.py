@@ -51,17 +51,6 @@ def read_users(db: Session = Depends(get_db),
     return users
 
 
-@app.get('/users/{user_id}', response_model=schemas.User)
-def read_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = crud.get_user(db, user_id=user_id)
-    if db_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found'
-        )
-    return db_user
-
-
 @app.post('/token')
 def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
@@ -84,7 +73,7 @@ def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.post('/ratings')
+@app.post('/ratings', response_model=schemas.Rating, status_code=201)
 def post_rating(data: schemas.RatingBase | schemas.CreateRatingItem,
                 db: Session = Depends(get_db),
                 user: models.User = Depends(auth_required)):
@@ -127,11 +116,16 @@ def post_rating(data: schemas.RatingBase | schemas.CreateRatingItem,
         )
 
 
-@app.get('/ratings')
-def get_ratings():
-    pass
+@app.get('/ratings', response_model=list[schemas.Rating])
+def get_ratings(db: Session = Depends(get_db),
+                user: models.User = Depends(auth_required)):
+    results = crud.get_user_ratings(db, user.id)
+    print(results)
+    return results
 
 
-@app.get('/ratings/{item_id}')
-def get_rating_detail(item_id: int):
-    pass
+@app.get('/item/{item_id}', response_model=schemas.RatingItem)
+def get_item_detail(item_id: int,
+                    db: Session = Depends(get_db),
+                    user: models.User = Depends(auth_required)):
+    return crud.get_rating_item(db, item_id)

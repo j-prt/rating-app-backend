@@ -1,6 +1,7 @@
 """Utility functions for effecting CRUD operations in ratings app."""
 
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from . import models, schemas, auth
 
@@ -70,3 +71,25 @@ def create_rating(db: Session,
         return None
     db.refresh(rating)
     return rating
+
+
+def get_user_ratings(db: Session, user_id: int) -> schemas.Rating:
+    query = select(
+        models.Rating,
+        models.RatingItem.title
+        ).join(
+            models.Rating.itemId,
+            models.Rating.itemId == models.RatingItem.id
+        ).where(
+            models.Rating.userId == user_id
+        )
+    result = db.execute(query).all()
+
+    # This line takes the joined query results and converts the
+    # row tuples into a new dictionary adding the key of 'title'
+    results_list = [{**x[0].__dict__,'title': x[1]} for x in result]
+    return results_list
+
+
+def get_rating_item(db: Session, item_id: int):
+    return db.query(models.RatingItem).filter(models.RatingItem.id == item_id).first()

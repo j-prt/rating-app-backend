@@ -41,6 +41,8 @@ class RatingItem(Base):
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     time_updated = Column(DateTime(timezone=True), onupdate=func.now())
 
+    # ratings = relationship('Rating', back_populates='rating_items')
+
     check = CheckConstraint(
         '''
         (latitude IS NOT NULL AND longitude IS NOT NULL)
@@ -56,5 +58,7 @@ class Rating(Base):
     userId = Column(ForeignKey('users.id'), nullable=False)
     rating = Column(Integer, nullable=False)
     description = Column(String)
+
+    # rating_items = relationship('RatingItem', back_populates='ratings')
 
     unique_user_item = UniqueConstraint('itemId', 'userId')
