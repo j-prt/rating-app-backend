@@ -124,8 +124,26 @@ def get_ratings(db: Session = Depends(get_db),
     return results
 
 
+@app.delete('/ratings/{rating_id}', status_code=status.HTTP_202_ACCEPTED)
+def delete_rating(rating_id: int,
+                  db: Session = Depends(get_db),
+                  user: models.User = Depends(auth_required)):
+    deleted = crud.delete_rating(db, user.id, rating_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Not authorized',
+        )
+    return {'message': 'Rating deleted!'}
+
+
 @app.get('/item/{item_id}', response_model=schemas.RatingItem)
 def get_item_detail(item_id: int,
                     db: Session = Depends(get_db),
                     user: models.User = Depends(auth_required)):
     return crud.get_rating_item(db, item_id)
+
+
+@app.delete('/item/{item_id}', status_code=status.HTTP_202_ACCEPTED)
+def delete_rating_item():
+    pass

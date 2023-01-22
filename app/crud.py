@@ -73,6 +73,18 @@ def create_rating(db: Session,
     return rating
 
 
+def delete_rating(db: Session, user_id, rating_id) -> bool:
+    rating = db.query(models.Rating).filter(models.Rating.id == rating_id).first()
+    if not rating:
+        return False
+    elif rating.userId != user_id:
+        return False
+    else:
+        db.delete(rating)
+        db.commit()
+        return True
+
+
 def get_user_ratings(db: Session, user_id: int) -> schemas.Rating:
     query = select(
         models.Rating,
