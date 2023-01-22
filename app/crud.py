@@ -74,7 +74,10 @@ def create_rating(db: Session,
 
 
 def delete_rating(db: Session, user_id, rating_id) -> bool:
-    rating = db.query(models.Rating).filter(models.Rating.id == rating_id).first()
+    rating = db.query(models.Rating).filter(
+        models.Rating.id == rating_id
+    ).first()
+
     if not rating:
         return False
     elif rating.userId != user_id:
@@ -105,3 +108,25 @@ def get_user_ratings(db: Session, user_id: int) -> schemas.Rating:
 
 def get_rating_item(db: Session, item_id: int):
     return db.query(models.RatingItem).filter(models.RatingItem.id == item_id).first()
+
+
+def delete_rating_item(db: Session, user_id, item_id) -> bool:
+    item = db.query(models.RatingItem).filter(
+        models.RatingItem.id == item_id
+    ).first()
+    if not item:
+        return False
+    elif item.userId != user_id:
+        return False
+    else:
+        ratings = db.query(models.Rating).filter(
+            models.Rating.itemId == item.id
+        ).all()
+        if len(ratings) > 1:
+            return False
+        elif ratings and ratings[0].userId != user_id:
+            return False
+        else:
+            db.delete(item)
+            db.commit()
+            return True

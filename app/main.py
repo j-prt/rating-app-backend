@@ -73,7 +73,7 @@ def login(user: schemas.UserValidate, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.post('/ratings', response_model=schemas.Rating, status_code=201)
+@app.post('/ratings', response_model=schemas.RatingSuccess, status_code=201)
 def post_rating(data: schemas.RatingBase | schemas.CreateRatingItem,
                 db: Session = Depends(get_db),
                 user: models.User = Depends(auth_required)):
@@ -141,9 +141,23 @@ def delete_rating(rating_id: int,
 def get_item_detail(item_id: int,
                     db: Session = Depends(get_db),
                     user: models.User = Depends(auth_required)):
-    return crud.get_rating_item(db, item_id)
+    result = crud.get_rating_item(db, item_id)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Item not found'
+        )
+    return result
 
 
 @app.delete('/item/{item_id}', status_code=status.HTTP_202_ACCEPTED)
-def delete_rating_item():
-    pass
+def delete_rating_item(item_id: int,
+                       db: Session = Depends(get_db),
+                       user: models.User = Depends(auth_required)):
+    deleted = crud.delete_rating_item(db, user.id, item_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Not authorized'
+        )
+    return {'message': 'Item deleted!'}

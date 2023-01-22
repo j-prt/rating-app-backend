@@ -64,6 +64,14 @@ class Rating(RatingBase):
         orm_mode = True
 
 
+class RatingSuccess(RatingBase):
+    id: int
+    userId: int
+
+    class Config:
+        orm_mode = True
+
+
 class CreateRatingItem(RatingItemBase):
     rating: int
     description: str | None = None
