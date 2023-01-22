@@ -2,6 +2,7 @@
 
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from . import models, schemas, auth
 
@@ -51,7 +52,7 @@ def create_rating_item(db: Session,
         )
         db.add(rating_item)
         db.commit()
-    except:
+    except IntegrityError:
         return None
     db.refresh(rating_item)
     return rating_item
@@ -62,12 +63,12 @@ def create_rating(db: Session,
                   data: dict) -> models.Rating | None:
     try:
         rating = models.Rating(
-            userId = user_id,
+            userId=user_id,
             **data,
         )
         db.add(rating)
         db.commit()
-    except:
+    except IntegrityError:
         return None
     db.refresh(rating)
     return rating
@@ -102,12 +103,14 @@ def get_user_ratings(db: Session, user_id: int) -> schemas.Rating:
 
     # This line takes the joined query results and converts the
     # row tuples into a new dictionary adding the key of 'title'
-    results_list = [{**x[0].__dict__,'title': x[1]} for x in result]
+    results_list = [{**x[0].__dict__, 'title': x[1]} for x in result]
     return results_list
 
 
 def get_rating_item(db: Session, item_id: int):
-    return db.query(models.RatingItem).filter(models.RatingItem.id == item_id).first()
+    return db.query(models.RatingItem).filter(
+        models.RatingItem.id == item_id
+    ).first()
 
 
 def delete_rating_item(db: Session, user_id, item_id) -> bool:

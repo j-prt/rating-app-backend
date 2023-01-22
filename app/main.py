@@ -108,6 +108,9 @@ def post_rating(data: schemas.RatingBase | schemas.CreateRatingItem,
         if desc:
             rating_data['description'] = desc
         rating = crud.create_rating(db, user.id, rating_data)
+        # Possible nondeterministic error occurring here
+        # Saving this print statement in case it occurs again
+        print(rating, rating_data)
         return rating
     else:
         raise HTTPException(
